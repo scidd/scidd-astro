@@ -1,14 +1,14 @@
 
 import logging
 
-import sciid
+import scidd
 from ...utilities.designpatterns import singleton
-from ...logger import sciid_logger as logger
+from ...logger import scidd_logger as logger
 #from ... import exc
 
 from .dataset import DatasetResolverBase
 
-logger = logging.getLogger("sciid")
+logger = logging.getLogger("scidd")
 
 @singleton
 class GALEXResolver(DatasetResolverBase):

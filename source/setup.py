@@ -1,5 +1,5 @@
 
-# ==================== sciid.astro =====================
+# ==================== scidd.astro =====================
 
 import re
 import setuptools
@@ -24,7 +24,7 @@ libraries = []		# libraries to include
 define_macros = [('NPY_NO_DEPRECATED_API', 'NPY_1_18_API_VERSION')] # warn if using a deprecated NumPy API, defined in numpy/numpyconfig.h
 extra_link_args = [] # e.g. ['-framework', 'OpenGL', '-framework', 'GLUT'])
 
-description = ('A Python package for implementing the "astro" domain of the SciID data identification scheme.')
+description = ('A Python package for implementing the "astro" domain of the SciDD data identification scheme.')
 
 try:
 	with open('HISTORY.rst') as history_file:
@@ -48,22 +48,22 @@ classifiers = [
     "Intended Audience :: Science/Research"
 ]
 
-exec(open('sciid/astro/version.py').read())
+exec(open('scidd/astro/version.py').read())
 setup(
-	name = "sciid_astro",
-	namespace_packages=["sciid"],
+	name = "scidd_astro",
+	namespace_packages=["scidd"],
 	version = __version__,
 	description = description,
 	long_description = long_description,
 	author = "Demitri Muna",
 	author_email = "<email>",
-	url="https://sciid.org",
+	url="https://scidd.org",
 	license = "<license>",
     project_urls={
-    	"Documentation": "https://sciid.org",
-    	"Source Code":"https://github.com/science-identifier/sciid",
+    	"Documentation": "https://scidd.org",
+    	"Source Code":"https://github.com/science-identifier/scidd",
     },
-	packages=setuptools.find_namespace_packages(include=["sciid.*"]), # sciid uses native namespaces; see: https://packaging.python.org/guides/packaging-namespace-packages/#native-namespace-packages
+	packages=setuptools.find_namespace_packages(include=["scidd.*"]), # scidd uses native namespaces; see: https://packaging.python.org/guides/packaging-namespace-packages/#native-namespace-packages
 	zip_safe=False,
 	#include_dirs=['trillian/core', 'trillian/dataset'],
 	data_files=data_files,

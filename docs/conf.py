@@ -1,4 +1,4 @@
-# === sciid conf.py ===
+# === scidd conf.py ===
 
 # Configuration file for the Sphinx documentation builder.
 #
@@ -18,18 +18,18 @@ from datetime import datetime
 import sphinx.ext
 sys.path.insert(0, os.path.abspath('../source'))
 
-import sciid
+import scidd
 
 # -- Project information -----------------------------------------------------
 
-project = 'SciID'
+project = 'SciDD'
 author = 'Demitri Muna'
 copyright = f'2020-{format(datetime.utcnow().year)} {author}, '
 
 
 # -- General configuration ---------------------------------------------------
 
-#primary_domain = 'sciid'
+#primary_domain = 'scidd'
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom

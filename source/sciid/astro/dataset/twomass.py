@@ -1,19 +1,19 @@
 
-#from .. import SciIDAstro
+#from .. import SciDDAstro
 #from ... import exc
-#from ... import SciIDFileResource
+#from ... import SciDDFileResource
 
 import logging
 
-import sciid
+import scidd
 from astropy.coordinates import SkyCoord
 
 from ...utilities.designpatterns import singleton
-from ...logger import sciid_logger as logger
+from ...logger import scidd_logger as logger
 
 from .dataset import DatasetResolverBase
 
-logger = logging.getLogger("sciid")
+logger = logging.getLogger("scidd")
 
 @singleton
 class TwoMASSResolver(DatasetResolverBase):
@@ -40,9 +40,9 @@ class TwoMASSResolver(DatasetResolverBase):
 		# 		if key == "uniqueid":
 		# 			path = os.path.join(ipix_path_within_cache, key)
 		# 			break
-		# 	assert path is not None, f"Expected to find a unique identifier for a filename, but one was not found: {sci_id}".
+		# 	assert path is not None, f"Expected to find a unique identifier for a filename, but one was not found: {sci_dd}".
 		# else:
-		# 	raise exc.UnexpectedSciIDFormatException("Format of 2MASS SciID not as expected.")
+		# 	raise exc.UnexpectedSciDDFormatException("Format of 2MASS SciDD not as expected.")
 	
 	def uniqueIdentifierForFilename(self) -> str:
 		'''
@@ -52,7 +52,7 @@ class TwoMASSResolver(DatasetResolverBase):
 		override this method to return an identifier when this is not the case.		
 		'''
 		# The filename should always be the last part of the URI if this is a filename, excluding any fragment.
-		uri = self.sciid.split("#")[0]  # strip fragment identifier (if present)
+		uri = self.scidd.split("#")[0]  # strip fragment identifier (if present)
 		filename = uri.split("/")[-1]   # filename will always be the last element
 		unique_id = filename.split(";")[1] # remove any unique identifier that might be present at the end of the filename
 		
@@ -67,7 +67,7 @@ class TwoMASSResolver(DatasetResolverBase):
 		#	_,identifier = match.group(1).split("=")
 		#	return identifier
 		#else:
-		#	raise exc.UnexpectedSciIDFormatException(f"Expected to find a unique identifier for a filename, but one was not found: '{sci_id}'.")
+		#	raise exc.UnexpectedSciDDFormatException(f"Expected to find a unique identifier for a filename, but one was not found: '{sci_dd}'.")
 
 	@property
 	def position(self) -> SkyCoord:
@@ -89,8 +89,8 @@ class TwoMASSResolver(DatasetResolverBase):
 				"dataset" : self.dataset
 			}
 	
-			#records = sciid.API().get(path="/astro/data/filename-search", params=parameters)
-			record = sciid.API().newFilenameRequest(filename=self.filename,
+			#records = scidd.API().get(path="/astro/data/filename-search", params=parameters)
+			record = scidd.API().newFilenameRequest(filename=self.filename,
 													uniqueid=self.uniqueIdentifierForFilename,
 													expect_one=True)
 	
@@ -99,8 +99,8 @@ class TwoMASSResolver(DatasetResolverBase):
 			#uniqueid = self.uniqueIdentifierForFilename
 			#for rec in records:
 			if True:
-				sci_id = record["sciid"]
-				if uniqueid in sci_id:
+				sci_dd = record["scidd"]
+				if uniqueid in sci_dd:
 					logger.debug(record)
 					pos = record["position"] # array or two points
 					self._position = SkyCoord(ra=pos[0]*u.deg, dec=pos[1]*u.deg)

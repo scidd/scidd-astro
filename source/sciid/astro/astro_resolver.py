@@ -7,18 +7,18 @@ from typing import Dict, List, Union
 
 import requests
 
-import sciid
+import scidd
 from .. import exc
 from ..cache import LocalAPICache
 from .dataset.galex import GALEXResolver
 from .dataset.wise import WISEResolver
 from .dataset.twomass import TwoMASSResolver
 from .dataset.sdss import SDSSResolver
-from ..logger import sciid_logger as logger
+from ..logger import scidd_logger as logger
 
-class SciIDAstroResolver(sciid.Resolver):
+class SciDDAstroResolver(scidd.Resolver):
 	'''
-	This resolver can translate SciIDs of the "sciid:astro" domain into URLs that point to the specific resource.
+	This resolver can translate SciDDs of the "scidd:astro" domain into URLs that point to the specific resource.
 	
 	This object encapsulates an external service that does the actual translation. By default the service used
 	is ``api.trillianverse.org``, but any service that communicates in the same way can be used. The default is sufficient
@@ -44,13 +44,13 @@ class SciIDAstroResolver(sciid.Resolver):
 		The same object will always be returned from this method (pseudo-singleton).
 		'''
 		if cls._default_instance is None:
-			if "SCIID_ASTRO_RESOLVER_HOST" in os.environ:
-				host = os.environ["SCIID_ASTRO_RESOLVER_HOST"]
+			if "SCIDD_ASTRO_RESOLVER_HOST" in os.environ:
+				host = os.environ["SCIDD_ASTRO_RESOLVER_HOST"]
 			else:
 				host = "api.trillianverse.org"
 			
-			if "SCIID_ASTRO_RESOLVER_PORT" in os.environ:
-				port = os.environ["SCIID_ASTRO_RESOLVER_PORT"]
+			if "SCIDD_ASTRO_RESOLVER_PORT" in os.environ:
+				port = os.environ["SCIDD_ASTRO_RESOLVER_PORT"]
 			else:
 				port = 443
 			cls._default_instance = cls(host=host, port=port)
@@ -85,12 +85,12 @@ class SciIDAstroResolver(sciid.Resolver):
 			
 			return response.json()
 	
-	def urlForSciID(self, sci_id:sciid.SciID, verify_resource=False) -> str:
+	def urlForSciDD(self, sci_dd:scidd.SciDD, verify_resource=False) -> str:
 		'''
-		This method resolves a SciID into a URL that can be used to retrieve the resource.
+		This method resolves a SciDD into a URL that can be used to retrieve the resource.
 		
-		:param sci_id: a `sciid.SciID` object
-		:param verify_resource: verify that the resource exists at the location returned, raises `sciid.exc.		ResourceUnavailableWhereResolverExpected` exception if not found
+		:param sci_dd: a `scidd.SciDD` object
+		:param verify_resource: verify that the resource exists at the location returned, raises `scidd.exc.		ResourceUnavailableWhereResolverExpected` exception if not found
 		'''
 
 		# match = re.search("^astro:/(data|file)/([^/]+)/(.+)", id_)
@@ -99,31 +99,31 @@ class SciIDAstroResolver(sciid.Resolver):
 		# 	dataset = match.group(2)
 		# 	segment = match.group(3)
 		
-		if isinstance(sci_id, sciid.astro.SciIDAstroData):
+		if isinstance(sci_dd, scidd.astro.SciDDAstroData):
 			raise NotImplementedError()
-		elif isinstance(sci_id, sciid.astro.SciIDAstroFile):
-			#print(f"dataset = {sci_id.dataset}")
-			dataset = sci_id.dataset.split(".")[0]
+		elif isinstance(sci_dd, scidd.astro.SciDDAstroFile):
+			#print(f"dataset = {sci_dd.dataset}")
+			dataset = sci_dd.dataset.split(".")[0]
 			if dataset == "galex":
-				url = GALEXResolver().resolveURLFromSciID(sci_id)
+				url = GALEXResolver().resolveURLFromSciDD(sci_dd)
 			elif dataset == "wise":
-				url = WISEResolver().resolveURLFromSciID(sci_id)
+				url = WISEResolver().resolveURLFromSciDD(sci_dd)
 			elif dataset == "2mass":
-				url = TwoMASSResolver().resolveURLFromSciID(sci_id)
+				url = TwoMASSResolver().resolveURLFromSciDD(sci_dd)
 			elif dataset == "sdss":
-				url = SDSSResolver().resolveURLFromSciID(sci_id)
+				url = SDSSResolver().resolveURLFromSciDD(sci_dd)
 			else:
-				raise NotImplementedError(f"The dataset '{sci_id.dataset}' does not currently have a resolver associated with it.")
+				raise NotImplementedError(f"The dataset '{sci_dd.dataset}' does not currently have a resolver associated with it.")
 		else:
-			raise NotImplementedError(f"Class {type(sci_id)} not handled in {self.__class__}.")
+			raise NotImplementedError(f"Class {type(sci_dd)} not handled in {self.__class__}.")
 				
 		
-		# if sci_id.sciid.startswith("sciid:/astro/data/"):
-		# 	url = self._url_for_astrodata(sci_id)
-		# elif sci_id.sciid.startswith("sciid:/astro/file/"):
-		# 	url = self._url_for_astrofile(sci_id)
+		# if sci_dd.scidd.startswith("scidd:/astro/data/"):
+		# 	url = self._url_for_astrodata(sci_dd)
+		# elif sci_dd.scidd.startswith("scidd:/astro/file/"):
+		# 	url = self._url_for_astrofile(sci_dd)
 		
-		#print(f"id={sci_id}")
+		#print(f"id={sci_dd}")
 		#print(f"url={url}")
 		
 		if verify_resource:
@@ -132,27 +132,27 @@ class SciIDAstroResolver(sciid.Resolver):
 				raise exc.ResourceUnavailableWhereResolverExpected("The resolver returned a URL, but the resource was not found at that location.")
 		return url
 
-	def _url_for_astrofile(self, sci_id) -> str:
+	def _url_for_astrofile(self, sci_dd) -> str:
 		'''
 		'''
 		# strip leading identifier text:
-		resource_path = sci_id.sciid[len("sciid:/astro/file"):]
+		resource_path = sci_dd.scidd[len("scidd:/astro/file"):]
 
 		raise NotImplementedError()
 	
-	def _url_for_astrodata(self, sci_id) -> str:
+	def _url_for_astrodata(self, sci_dd) -> str:
 		'''
 		'''
 		# strip leading identifier text:
-		resource_path = sci_id.sciid[len("sciid:/astro/data"):]
+		resource_path = sci_dd.scidd[len("scidd:/astro/data"):]
 		
 		raise NotImplementedError()
 
-	def resourceForID(self, sci_id):
+	def resourceForID(self, sci_dd):
 		'''
-		Resolve the provided "sciid:" identifier and retrieve the resource it points to.
+		Resolve the provided "scidd:" identifier and retrieve the resource it points to.
 		'''
-		url = self.urlForSciID(sci_id)
+		url = self.urlForSciDD(sci_dd)
 		
 		# todo: fetch data/file for URL
 		

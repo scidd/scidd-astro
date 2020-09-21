@@ -1,3 +1,5 @@
 
-from .astro_resolver import SciIDAstroResolver
-from .astro_sciid import SciIDAstro, SciIDAstroData, SciIDAstroFile
+from .version import __version__
+
+from .astro_resolver import SciDDAstroResolver
+from .astro_scidd import SciDDAstro, SciDDAstroData, SciDDAstroFile

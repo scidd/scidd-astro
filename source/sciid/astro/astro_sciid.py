@@ -7,58 +7,58 @@ import json
 import pathlib
 from typing import Union, List
 
-import sciid
-from sciid import LocalAPICache
+import scidd
+from scidd import LocalAPICache
 import astropy.units as u
 from astropy.coordinates import SkyCoord
 
 from .. import exc
-from ..logger import sciid_logger as logger
-from .. import SciID, SciIDFileResource, Resolver
-from . import SciIDAstroResolver
+from ..logger import scidd_logger as logger
+from .. import SciDD, SciDDFileResource, Resolver
+from . import SciDDAstroResolver
 
 compression_extensions = [".zip", ".tgz", ".gz", "bz2"]
 
-class SciIDAstro(SciID):
+class SciDDAstro(SciDD):
 	'''
-	This class is wrapper around SciID identifiers in the 'astro' namespace ("sciid:/astro").
+	This class is wrapper around SciDD identifiers in the 'astro' namespace ("scidd:/astro").
 	
-	:param sciid: a SciID identifier or one assumed to have "sciid:/astro" prepended to it
+	:param scidd: a SciDD identifier or one assumed to have "scidd:/astro" prepended to it
 	:param resolver: an object that can resolve the identifier to a URL; for most cases using the default resolver by passing 'None' is the right choice
 	'''
-	def __init__(self, sci_id:str=None, resolver:Resolver=None):
-		if isinstance(sci_id, SciID):
-			sci_id = str(sci_id)
-		if not sci_id.startswith("sciid:/astro/") and sci_id.startswith("/"):
-			# allow abbreviated form, e.g. "/data/galex/..." becomes "sciid:/astro/galex/...";
-			sci_id = "sciid:/astro" + sci_id
+	def __init__(self, sci_dd:str=None, resolver:Resolver=None):
+		if isinstance(sci_dd, SciDD):
+			sci_dd = str(sci_dd)
+		if not sci_dd.startswith("scidd:/astro/") and sci_dd.startswith("/"):
+			# allow abbreviated form, e.g. "/data/galex/..." becomes "scidd:/astro/galex/...";
+			sci_dd = "scidd:/astro" + sci_dd
 		if resolver is None:
-			resolver = SciIDAstroResolver.defaultResolver()
+			resolver = SciDDAstroResolver.defaultResolver()
 		
-		super().__init__(sci_id=sci_id, resolver=resolver)
+		super().__init__(sci_dd=sci_dd, resolver=resolver)
 		
 		self._dataset = None # cache value -> this is in the form "dataset.release", e.g. "sdss.dr13"
 		
-	def __new__(cls, sci_id:str=None, resolver:Resolver=None):
+	def __new__(cls, sci_dd:str=None, resolver:Resolver=None):
 		'''
-		If the SciID passed into the constructor can be identified as being handled by a specialized subclass, that subclass is instantiated.
+		If the SciDD passed into the constructor can be identified as being handled by a specialized subclass, that subclass is instantiated.
 		'''
-		if cls is SciIDAstro:
+		if cls is SciDDAstro:
 			# note: the walrus operation (3.8+) will be useful here
 
 			# dataset specific classes
-			match = re.search("sciid:/astro/(?P<type>data|file)/2mass/.+", str(sci_id))
+			match = re.search("scidd:/astro/(?P<type>data|file)/2mass/.+", str(sci_dd))
 			if match:
 				if match.group("type") == "data":
-					return super().__new__(sciid.astro.SciIDAstroData)
+					return super().__new__(scidd.astro.SciDDAstroData)
 				else: # type == "file"
-					return super().__new__(sciid.astro.dataset.twomass.SciIDAstro2MassFile)
+					return super().__new__(scidd.astro.dataset.twomass.SciDDAstro2MassFile)
 
 			# anything else that can be handled by the "generic" classes
-			if str(sci_id).startswith("sciid:/astro/data/"):
-				return super().__new__(sciid.astro.SciIDAstroData)
-			elif str(sci_id).startswith("sciid:/astro/file/"):
-				return super().__new__(sciid.astro.SciIDAstroFile)
+			if str(sci_dd).startswith("scidd:/astro/data/"):
+				return super().__new__(scidd.astro.SciDDAstroData)
+			elif str(sci_dd).startswith("scidd:/astro/file/"):
+				return super().__new__(scidd.astro.SciDDAstroFile)
 
 		return super().__new__(cls)
 	
@@ -66,32 +66,32 @@ class SciIDAstro(SciID):
 		'''
 		Performs (very!) basic validation of the syntax of the identifier.
 		'''
-		return self._sciid.startswith("sciid:/astro")
+		return self._scidd.startswith("scidd:/astro")
 
 	@property
 	def dataset(self) -> str:
 		'''
 		Returns the short label of the dataset and the release separated by a '.', e.g. ``sdss.dr16``
 		
-		In the context of astro data SciIDs, the dataset is the first collection and the release is the first
+		In the context of astro data SciDDs, the dataset is the first collection and the release is the first
 		subcollection/path element that follows.
 		
 		The short label can be used to get the dataset object, e.g. "galex" -> Dataset.from_short_name("galex")
 		'''
 		if self._dataset is None:
-			match = re.search("^sciid:/astro/(data|file)/([^/]+)/([^/^.]+)", self.sciid)
+			match = re.search("^scidd:/astro/(data|file)/([^/]+)/([^/^.]+)", self.scidd)
 			if match:
 				self._dataset = ".".join([match.group(2), match.group(3)])
-		#		match = re.search("^sciid:/astro/(data|file)/([^/]+)", self.sciid)
+		#		match = re.search("^scidd:/astro/(data|file)/([^/]+)", self.scidd)
 		#		if match:
 		#			self._dataset = match.group(2)
 		return self._dataset
-		#return str(self.sciid).split("/")[3] # first string after "data/"
+		#return str(self.scidd).split("/")[3] # first string after "data/"
 	
 	# @property
 	# def release(self) -> str:
 	# 	'''
-	# 	The release on a `sciid:/astro/(file|data)/<dataset>/`-style id is the subcollection/path immediately following the dataset.
+	# 	The release on a `scidd:/astro/(file|data)/<dataset>/`-style id is the subcollection/path immediately following the dataset.
 	# 	'''
 	# 	if self._release is None:
 	# 		match = re.search(
@@ -99,14 +99,14 @@ class SciIDAstro(SciID):
 	# 	return self._release
 	
 	
-class SciIDAstroData(SciIDAstro):
+class SciDDAstroData(SciDDAstro):
 	'''
-	An identifier pointing to data in the astronomy namespace ("sciid:/astro/data/").
+	An identifier pointing to data in the astronomy namespace ("scidd:/astro/data/").
 	'''
-	def __init__(self, sci_id:str=None, resolver:Resolver=None):
-		if sci_id.startswith("sciid:") and not sci_id.startswith("sciid:/astro/data/"):
-			raise exc.SciIDClassMismatch(f"Attempting to create {self.__class__} object with a SciID that does not begin with 'sciid:/astro/data/'; try using the 'SciID(sci_id)' factory constructor instead.")
-		super().__init__(sci_id=sci_id, resolver=resolver)
+	def __init__(self, sci_dd:str=None, resolver:Resolver=None):
+		if sci_dd.startswith("scidd:") and not sci_dd.startswith("scidd:/astro/data/"):
+			raise exc.SciDDClassMismatch(f"Attempting to create {self.__class__} object with a SciDD that does not begin with 'scidd:/astro/data/'; try using the 'SciDD(sci_dd)' factory constructor instead.")
+		super().__init__(sci_dd=sci_dd, resolver=resolver)
 	
 	def isFile(self) -> bool:
 		''' Returns 'True' if this identifier points to a file. '''
@@ -116,25 +116,25 @@ class SciIDAstroData(SciIDAstro):
 		'''
 		Performs basic validation of the syntax of the identifier; a returned value of 'True' does not guarantee a resource will be found.
 		'''
-		return self._sciid.startswith("sciid:/astro/data/")
+		return self._scidd.startswith("scidd:/astro/data/")
 	
-class SciIDAstroFile(SciIDAstro, SciIDFileResource):
+class SciDDAstroFile(SciDDAstro, SciDDFileResource):
 	'''
-	An identifier pointing to a file in the astronomy namespace ("sciid:/astro/file/").
+	An identifier pointing to a file in the astronomy namespace ("scidd:/astro/file/").
 	
-	:param sci_id: the SciID identifier
-	:param resolver: an object that knows how to translate a SciID into a URL that points to the specific resource
+	:param sci_dd: the SciDD identifier
+	:param resolver: an object that knows how to translate a SciDD into a URL that points to the specific resource
 	'''
 	
-	def __init__(self, sci_id:str=None, resolver:Resolver=None):
-		SciIDAstro.__init__(self, sci_id=sci_id, resolver=resolver)
-		SciIDFileResource.__init__(self)
+	def __init__(self, sci_dd:str=None, resolver:Resolver=None):
+		SciDDAstro.__init__(self, sci_dd=sci_dd, resolver=resolver)
+		SciDDFileResource.__init__(self)
 		self._position = None
 	
 	# @property
 	# def path_within_cache(self):
 	# 	'''
-	# 	The directory path within the top level SciID cache where the file would be written when downloaded, not including filename.
+	# 	The directory path within the top level SciDD cache where the file would be written when downloaded, not including filename.
 	# 	'''
 	# 	if self._cache_path is None:
 	# 		match = re.search("^/astro/file/(.+)#?", str(pathlib.Path(self.path)))
@@ -155,7 +155,7 @@ class SciIDAstroFile(SciIDAstro, SciIDFileResource):
 		'''
 		Performs basic validation of the syntax of the identifier; a returned value of 'True' does not guarantee a resource will be found.
 		'''
-		return self._sciid.startswith("sciid:/astro/file/")
+		return self._scidd.startswith("scidd:/astro/file/")
 
 	@property
 	def filenamesUniqueInDataset(self) -> bool:
@@ -177,8 +177,8 @@ class SciIDAstroFile(SciIDAstro, SciIDFileResource):
 		override this method to return an identifier when this is not the case.		
 		'''
 		
-		# example of SciID with a filename identifier:
-		# sciid:/astro/file/2mass/allsky/ji0270198.fits;uniqueid=20001017.s.27#1
+		# example of SciDD with a filename identifier:
+		# scidd:/astro/file/2mass/allsky/ji0270198.fits;uniqueid=20001017.s.27#1
 		
 		if self._filename_unique_identifier is None:
 			match = re.search("^.+;([^#]+)", str(self))
@@ -205,7 +205,7 @@ class SciIDAstroFile(SciIDAstro, SciIDFileResource):
 		:param without_compressed_extension: if True, removes extensions indicating compression (e.g. ".zip", ".tgz", etc.)
 		'''
 		# The filename should always be the last part of the URI if this is a filename, excluding any fragment.
-		uri = self.sciid.split("#")[0]  # strip fragment identifier (if present)
+		uri = self.scidd.split("#")[0]  # strip fragment identifier (if present)
 		filename = uri.split("/")[-1]   # filename will always be the last element
 		filename = filename.split(";")[0] # remove any unique identifier that might be present at the end of the filename
 		
@@ -218,23 +218,23 @@ class SciIDAstroFile(SciIDAstro, SciIDFileResource):
 	@property
 	def url(self) -> str:
 		'''
-		Returns a specific location (URL) that points to the resource described by this SciID using the :py:class:`sciid.Resolver` assigned to this object.
+		Returns a specific location (URL) that points to the resource described by this SciDD using the :py:class:`scidd.Resolver` assigned to this object.
 		'''
 		if self._url is None:
 			if self.resolver is None:
-				raise exc.NoResolverAssignedException("Attempting to resolve a SciID without having first set a resolver object.")
+				raise exc.NoResolverAssignedException("Attempting to resolve a SciDD without having first set a resolver object.")
 			
-			self._url = self.resolver.urlForSciID(self)
+			self._url = self.resolver.urlForSciDD(self)
 		return self._url
 
 	@classmethod
-	def fromFilename(cls, filename:str, allow_multiple_results=False) -> Union[SciID,List[SciID]]:
+	def fromFilename(cls, filename:str, allow_multiple_results=False) -> Union[SciDD,List[SciDD]]:
 		'''
-		A factory method that attempts to return a SciID identifier from a filename alone; depends on domain-specific resolvers.
+		A factory method that attempts to return a SciDD identifier from a filename alone; depends on domain-specific resolvers.
 		
-		:param filename: the filename to create a SciID identifier from
+		:param filename: the filename to create a SciDD identifier from
 		:param domain: the top level domain of the resource, e.g. `astro`
-		:param allow_multiple_results: when True will raise an exception if the filename is not unique; if False will always return an array of matching SciIDs.
+		:param allow_multiple_results: when True will raise an exception if the filename is not unique; if False will always return an array of matching SciDDs.
 		'''
 		CACHE_KEY = f"astro/filename:{filename}"
 		
@@ -245,7 +245,7 @@ class SciIDAstroFile(SciIDAstro, SciIDFileResource):
 		except KeyError:
 			# Use the generic filename resolver which assumes the filename is unique across all curated data.
 			# If this is not the case, override this method in a subclass (e.g. see the twomass.py file).
-			list_of_results = SciIDAstroResolver.defaultResolver().genericFilenameResolver(filename=filename)
+			list_of_results = SciDDAstroResolver.defaultResolver().genericFilenameResolver(filename=filename)
 			
 			# save to cache
 			try:
@@ -257,18 +257,18 @@ class SciIDAstroFile(SciIDAstro, SciIDFileResource):
 
 		if allow_multiple_results:
 			for record in list_of_results:
-				s = SciID(rec["sciid"])
+				s = SciDD(rec["scidd"])
 				s.url = rec["url"] # since we have it here anyway
 				s._uncompressed_file_size = rec["file_size"]
 				s._dataset = ".".join([rec["dataset"], rec["release"]]) # note there isn't a public interface for this
-			return [SciID(rec["sciid"]) for rec in list_of_results]
+			return [SciDD(rec["scidd"]) for rec in list_of_results]
 		else:
 			if len(list_of_results) == 1:
-				return SciID(list_of_results[0]["sciid"])
+				return SciDD(list_of_results[0]["scidd"])
 			elif len(list_of_results) > 1:
-				raise exc.UnableToResolveFilenameToSciID(f"Multiple SciIDs were found for the filename '{filename}'. Set the flag 'allow_multiple_results' to True to return all in a list.")
+				raise exc.UnableToResolveFilenameToSciDD(f"Multiple SciDDs were found for the filename '{filename}'. Set the flag 'allow_multiple_results' to True to return all in a list.")
 			else:
-				raise exc.UnableToResolveFilenameToSciID(f"Could not find the filename '{filename}' in known datasets. Is the dataset one of those currently implemented?")
+				raise exc.UnableToResolveFilenameToSciDD(f"Could not find the filename '{filename}' in known datasets. Is the dataset one of those currently implemented?")
 				# TODO: create API call to list currently implemented datasets
 
 	@property
@@ -295,7 +295,7 @@ class SciIDAstroFile(SciIDAstro, SciIDFileResource):
 				raise NotImplementedError("TODO: handle 'uniqueid' or whatever we land on to disambiguate filenames.")
 				parameters[""] = None
 	
-			records = sciid.API().get(path="/astro/data/filename-search", params=parameters)
+			records = scidd.API().get(path="/astro/data/filename-search", params=parameters)
 			
 			logger.debug(records)
 			if not len(records) == 1:
