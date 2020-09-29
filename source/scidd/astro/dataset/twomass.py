@@ -8,8 +8,8 @@ import logging
 import scidd
 from astropy.coordinates import SkyCoord
 
-from ...utilities.designpatterns import singleton
-from ...logger import scidd_logger as logger
+from scidd.core.utilities.designpatterns import singleton
+from scidd.core.logger import scidd_logger as logger
 
 from .dataset import DatasetResolverBase
 
@@ -42,7 +42,7 @@ class TwoMASSResolver(DatasetResolverBase):
 		# 			break
 		# 	assert path is not None, f"Expected to find a unique identifier for a filename, but one was not found: {sci_dd}".
 		# else:
-		# 	raise exc.UnexpectedSciDDFormatException("Format of 2MASS SciDD not as expected.")
+		# 	raise scidd.core.exc.UnexpectedSciDDFormatException("Format of 2MASS SciDD not as expected.")
 	
 	def uniqueIdentifierForFilename(self) -> str:
 		'''
@@ -67,7 +67,7 @@ class TwoMASSResolver(DatasetResolverBase):
 		#	_,identifier = match.group(1).split("=")
 		#	return identifier
 		#else:
-		#	raise exc.UnexpectedSciDDFormatException(f"Expected to find a unique identifier for a filename, but one was not found: '{sci_dd}'.")
+		#	raise scidd.core.exc.UnexpectedSciDDFormatException(f"Expected to find a unique identifier for a filename, but one was not found: '{sci_dd}'.")
 
 	@property
 	def position(self) -> SkyCoord:

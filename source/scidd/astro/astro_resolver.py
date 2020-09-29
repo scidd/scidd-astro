@@ -7,16 +7,17 @@ from typing import Dict, List, Union
 
 import requests
 
-import scidd
-from .. import exc
-from ..cache import LocalAPICache
+import scidd.core
+import scidd.core.exc
+from scidd.core.cache import LocalAPICache
+from scidd.core.logger import scidd_logger as logger
+
 from .dataset.galex import GALEXResolver
 from .dataset.wise import WISEResolver
 from .dataset.twomass import TwoMASSResolver
 from .dataset.sdss import SDSSResolver
-from ..logger import scidd_logger as logger
 
-class SciDDAstroResolver(scidd.Resolver):
+class SciDDAstroResolver(scidd.core.Resolver):
 	'''
 	This resolver can translate SciDDs of the "scidd:astro" domain into URLs that point to the specific resource.
 	
@@ -81,16 +82,16 @@ class SciDDAstroResolver(scidd.Resolver):
 					err_msg = response.json()["errors"][0]["message"]
 				except:
 					err_msg = response.json()
-				raise exc.TrillianAPIException(f"An error occurred accessing the Trillian API: {err_msg}")
+				raise scidd.core.exc.TrillianAPIException(f"An error occurred accessing the Trillian API: {err_msg}")
 			
 			return response.json()
 	
-	def urlForSciDD(self, sci_dd:scidd.SciDD, verify_resource=False) -> str:
+	def urlForSciDD(self, sci_dd:scidd.core.SciDD, verify_resource=False) -> str:
 		'''
 		This method resolves a SciDD into a URL that can be used to retrieve the resource.
 		
-		:param sci_dd: a `scidd.SciDD` object
-		:param verify_resource: verify that the resource exists at the location returned, raises `scidd.exc.		ResourceUnavailableWhereResolverExpected` exception if not found
+		:param sci_dd: a `scidd.core.SciDD` object
+		:param verify_resource: verify that the resource exists at the location returned, raises `scidd.core.exc.		ResourceUnavailableWhereResolverExpected` exception if not found
 		'''
 
 		# match = re.search("^astro:/(data|file)/([^/]+)/(.+)", id_)
@@ -129,7 +130,7 @@ class SciDDAstroResolver(scidd.Resolver):
 		if verify_resource:
 			r = requests.head(url)
 			if r.status_code != requests.codes.ok:
-				raise exc.ResourceUnavailableWhereResolverExpected("The resolver returned a URL, but the resource was not found at that location.")
+				raise scidd.core.exc.ResourceUnavailableWhereResolverExpected("The resolver returned a URL, but the resource was not found at that location.")
 		return url
 
 	def _url_for_astrofile(self, sci_dd) -> str:

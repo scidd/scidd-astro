@@ -4,9 +4,9 @@ import pdb
 import json
 from abc import ABC, abstractmethod, abstractproperty
 
-from ... import exc
-from ... import SciDD
-from ...logger import scidd_logger as logger
+import scidd.core.exc
+from scidd.core import SciDD
+from scidd.core.logger import scidd_logger as logger
 
 # class DatasetResolverBaseMeta(type):
 # 	@staticmethod
@@ -57,6 +57,6 @@ class DatasetResolverBase(ABC):
 				sci_dd._url = url
 			return url
 		elif len(records) == 0:
-			raise exc.UnableToResolveSciDDToURL(f"The SciDD could not be resolved to a URL (no records found): '{sci_dd}'.")
+			raise scidd.core.exc.UnableToResolveSciDDToURL(f"The SciDD could not be resolved to a URL (no records found): '{sci_dd}'.")
 		else:
-			raise exc.UnableToResolveSciDDToURL(f"The SciDD could not be resolved to a single URL ({len(records)} records found): '{sci_dd}'.")
+			raise scidd.core.exc.UnableToResolveSciDDToURL(f"The SciDD could not be resolved to a single URL ({len(records)} records found): '{sci_dd}'.")

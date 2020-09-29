@@ -7,14 +7,14 @@ import json
 import pathlib
 from typing import Union, List
 
-import scidd
-from scidd import LocalAPICache
+import scidd.core
+import scidd.core.exc
+from scidd.core import LocalAPICache
+from scidd.core.logger import scidd_logger as logger
+from scidd.core import SciDD, SciDDFileResource, Resolver
 import astropy.units as u
 from astropy.coordinates import SkyCoord
 
-from .. import exc
-from ..logger import scidd_logger as logger
-from .. import SciDD, SciDDFileResource, Resolver
 from . import SciDDAstroResolver
 
 compression_extensions = [".zip", ".tgz", ".gz", "bz2"]
@@ -105,7 +105,7 @@ class SciDDAstroData(SciDDAstro):
 	'''
 	def __init__(self, sci_dd:str=None, resolver:Resolver=None):
 		if sci_dd.startswith("scidd:") and not sci_dd.startswith("scidd:/astro/data/"):
-			raise exc.SciDDClassMismatch(f"Attempting to create {self.__class__} object with a SciDD that does not begin with 'scidd:/astro/data/'; try using the 'SciDD(sci_dd)' factory constructor instead.")
+			raise scidd.core.exc.SciDDClassMismatch(f"Attempting to create {self.__class__} object with a SciDD that does not begin with 'scidd:/astro/data/'; try using the 'SciDD(sci_dd)' factory constructor instead.")
 		super().__init__(sci_dd=sci_dd, resolver=resolver)
 	
 	def isFile(self) -> bool:
@@ -222,7 +222,7 @@ class SciDDAstroFile(SciDDAstro, SciDDFileResource):
 		'''
 		if self._url is None:
 			if self.resolver is None:
-				raise exc.NoResolverAssignedException("Attempting to resolve a SciDD without having first set a resolver object.")
+				raise scidd.core.exc.NoResolverAssignedException("Attempting to resolve a SciDD without having first set a resolver object.")
 			
 			self._url = self.resolver.urlForSciDD(self)
 		return self._url
@@ -266,9 +266,9 @@ class SciDDAstroFile(SciDDAstro, SciDDFileResource):
 			if len(list_of_results) == 1:
 				return SciDD(list_of_results[0]["scidd"])
 			elif len(list_of_results) > 1:
-				raise exc.UnableToResolveFilenameToSciDD(f"Multiple SciDDs were found for the filename '{filename}'. Set the flag 'allow_multiple_results' to True to return all in a list.")
+				raise scidd.core.exc.UnableToResolveFilenameToSciDD(f"Multiple SciDDs were found for the filename '{filename}'. Set the flag 'allow_multiple_results' to True to return all in a list.")
 			else:
-				raise exc.UnableToResolveFilenameToSciDD(f"Could not find the filename '{filename}' in known datasets. Is the dataset one of those currently implemented?")
+				raise scidd.core.exc.UnableToResolveFilenameToSciDD(f"Could not find the filename '{filename}' in known datasets. Is the dataset one of those currently implemented?")
 				# TODO: create API call to list currently implemented datasets
 
 	@property
