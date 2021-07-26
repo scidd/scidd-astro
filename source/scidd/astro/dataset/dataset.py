@@ -12,11 +12,11 @@ from scidd.core.logger import scidd_logger as logger
 # 	@staticmethod
 # 	def resolve_filename(sci_dd) -> str:
 # 		return DatasetResolverBase.resolveFilenameFromRelease(sci_dd=sci_dd, dataset=__class__._dataset, releases=__class__._releases)
-		
+
 
 class DatasetResolverBase(ABC):
 	'''
-	
+
 	'''
 	@abstractproperty
 	def dataset(self):
@@ -32,7 +32,7 @@ class DatasetResolverBase(ABC):
 	#def resolveURLFromRelease(self, sci_dd:SciDD=None, dataset:str=None, releases:List[str]=None) -> str:
 		'''
 		Given a SciDD pointing to a file, return a URL that locates the resource.
-		
+
 		:param sci_dd: a SciDD object
 		'''
 		#:param dataset: the short name of the dataset
@@ -40,16 +40,16 @@ class DatasetResolverBase(ABC):
 		#'''
 
 		try:
-			dataset, release = sci_dd.dataset.split(".")
+			dataset, release = sci_dd.datasetRelease.split(".")
 		except ValueError:
-			dataset = sci_dd.dataset
+			dataset = sci_dd.datasetRelease
 			release = None
 
 		records = sci_dd.resolver.genericFilenameResolver(dataset=dataset,
 														  release=release,
 														  filename=sci_dd.filename,
 														  uniqueid=sci_dd.filenameUniqueIdentifier)
-		
+
 		logger.debug(f"response: {json.dumps(records, indent=4)}\n")
 		if len(records) == 1:
 			url = records[0]["url"] # don't set sci_dd.url here or will infinitely recurse
