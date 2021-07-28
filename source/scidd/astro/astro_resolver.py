@@ -60,7 +60,7 @@ class SciDDAstroResolver(scidd.core.Resolver):
 			cls._default_instance = cls(host=host, port=port)
 		return cls._default_instance
 
-	def get(self, path:str=None, params:dict={}, data:dict={}, headers:Dict[str,str]=None) -> Union[Dict,List]:
+	def get(self, path:str, params:dict=None, data:dict=None, headers:Dict[str,str]=None) -> Union[Dict,List]:
 		'''
 		Make a GET call on the Trillian API with the given path and parameters.
 
@@ -70,8 +70,13 @@ class SciDDAstroResolver(scidd.core.Resolver):
 		:returns: JSON response
 		:raises: see: https://2.python-requests.org/en/master/api/#exceptions
 		'''
-		if path is None:
-			raise ValueError("A path must be provided to make an API call.")
+		#if path is None:
+		#	raise ValueError("A path must be provided to make an API call.")
+
+		if params is None:
+			params = dict()
+		if data is None:
+			data = dict()
 
 		with requests.Session() as http_session:
 			response = http_session.get(self.base_url + path, params=params)
