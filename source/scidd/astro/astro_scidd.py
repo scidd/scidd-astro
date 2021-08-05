@@ -87,6 +87,16 @@ class SciDDAstro(SciDD):
 		#			self._dataset = match.group(2)
 		return self._datasetRelease
 
+	@property
+	def dataset(self) -> str:
+		'''
+		Returns the short label of the dataset indicated in the SciDD.
+		'''
+		# This doesn't feel strongly robust; also maybe should not
+		# name it "dataset" as it doesn't return an object as
+		# it would in Trillian.
+		return self.datasetRelease.split(".")[0]
+
 	# @property
 	# def release(self) -> str:
 	# 	'''
