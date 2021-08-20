@@ -2,7 +2,7 @@
 import re
 import pdb
 import json
-from abc import ABC, abstractmethod, abstractproperty
+from abc import ABC, ABCMeta, abstractmethod, abstractproperty
 
 import scidd.core.exc
 from scidd.core import SciDD
@@ -14,9 +14,9 @@ from scidd.core.logger import scidd_logger as logger
 # 		return DatasetResolverBase.resolveFilenameFromRelease(sci_dd=sci_dd, dataset=__class__._dataset, releases=__class__._releases)
 
 
-class DatasetResolverBase(ABC):
+class DatasetResolverBase(metaclass=ABCMeta):
 	'''
-
+	This is the base class for resolvers
 	'''
 	@abstractproperty
 	def dataset(self):

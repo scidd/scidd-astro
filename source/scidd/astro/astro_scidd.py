@@ -264,6 +264,8 @@ class SciDDAstroFile(SciDDAstro, SciDDFileResource):
 				logger.debug(f"Note: exception in trying to save API response to cache: {e}")
 				pass
 
+		logger.debug(f"{list_of_results=}")
+
 		if allow_multiple_results:
 			for record in list_of_results:
 				s = SciDD(rec["scidd"])
@@ -304,7 +306,7 @@ class SciDDAstroFile(SciDDAstro, SciDDFileResource):
 				raise NotImplementedError("TODO: handle 'uniqueid' or whatever we land on to disambiguate filenames.")
 				parameters[""] = None
 
-			records = scidd.API().get(path="/astro/data/filename-search", params=parameters)
+			records = scidd.core.API().get(path="/astro/data/filename-search", params=parameters)
 
 			logger.debug(records)
 			if not len(records) == 1:
