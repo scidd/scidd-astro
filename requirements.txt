@@ -1,0 +1,2 @@
+requests>=2.25.1
+astropy>=4.2.1
