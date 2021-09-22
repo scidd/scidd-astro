@@ -139,6 +139,7 @@ class SciDDAstroFile(SciDDAstro, SciDDFileResource):
 		SciDDAstro.__init__(self, sci_dd=sci_dd, resolver=resolver)
 		SciDDFileResource.__init__(self)
 		self._position = None
+		self._uniqueid_checked = False
 
 	# @property
 	# def path_within_cache(self):
@@ -180,16 +181,17 @@ class SciDDAstroFile(SciDDAstro, SciDDFileResource):
 	@property
 	def filenameUniqueIdentifier(self) -> str:
 		'''
-		Returns a string that can be used as a unique identifier to disambiguate files that have the same name within a dataset .
+		Returns a string that can be used as a unique identifier to disambiguate files that have the same name within the same dataset.
 
-		The default returns an empty string as it is assumed filenames within a dataset are unique;
+		The default returns "None" as it is assumed filenames within a dataset are unique;
 		override this method to return an identifier when this is not the case.
 		'''
 
 		# example of SciDD with a filename identifier:
 		# scidd:/astro/file/2mass/allsky/ji0270198.fits;uniqueid=20001017.s.27#1
 
-		if self._filename_unique_identifier is None:
+		if self._uniqueid_checked is False:
+		#if self._filename_unique_identifier is None:
 			match = re.search("^.+;([^#]+)", str(self))
 			if match:
 				extended_file_descriptor = match.group(1)
@@ -198,6 +200,8 @@ class SciDDAstroFile(SciDDAstro, SciDDFileResource):
 					self._filename_unique_identifier = d["uniqueid"]
 			else:
 				self._filename_unique_identifier = None
+
+			self._uniqueid_checked = True
 
 
 			# match = re.search("^.+;uniqueid=([^#]+)", str(self))

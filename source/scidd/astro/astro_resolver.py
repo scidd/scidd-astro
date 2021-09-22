@@ -124,6 +124,8 @@ class SciDDAstroResolver(scidd.core.Resolver):
 		:param verify_resource: verify that the resource exists at the location returned, raises `scidd.core.exc.		ResourceUnavailableWhereResolverExpected` exception if not found
 		'''
 
+		from .astro_scidd import SciDDAstroFile, SciDDAstroData # avoid circular import
+
 		# match = re.search("^astro:/(data|file)/([^/]+)/(.+)", id_)
 		# if match:
 		# 	top_level = match.group(1)
@@ -132,9 +134,9 @@ class SciDDAstroResolver(scidd.core.Resolver):
 
 		logger.debug("")
 
-		if isinstance(sci_dd, scidd.astro.SciDDAstroData):
+		if isinstance(sci_dd, SciDDAstroData):
 			raise NotImplementedError()
-		elif isinstance(sci_dd, scidd.astro.SciDDAstroFile):
+		elif isinstance(sci_dd, SciDDAstroFile):
 			#print(f"dataset = {sci_dd.dataset}")
 			dataset = sci_dd.datasetRelease.split(".")[0]
 			if dataset == "galex":
