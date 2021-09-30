@@ -36,7 +36,7 @@ class SciDDAstroResolver(scidd.core.Resolver):
 
 	def __init__(self, scheme:str="https", host:str=None, port:int=None):
 		super().__init__(scheme=scheme, host=host, port=port)
-		self.useCache = True
+		self._useCache = True
 
 	@classmethod
 	def defaultResolver(cls):
@@ -59,6 +59,21 @@ class SciDDAstroResolver(scidd.core.Resolver):
 				port = 443
 			cls._default_instance = cls(host=host, port=port)
 		return cls._default_instance
+
+	@property
+	def useCache(self) -> bool:
+		# let environment variable override any setting here
+		try:
+			if os.environ["SCIDD_USE_CACHE"].lower() in ["0", "false", "f"]:
+				return False
+		except KeyError:
+			pass
+
+		return self._useCache
+
+	@useCache.setter
+	def useCache(self, new_value:bool):
+		self._useCache = bool(new_value)
 
 	def get(self, path:str, params:dict=None, data:dict=None, headers:Dict[str,str]=None) -> Union[Dict,List]:
 		'''

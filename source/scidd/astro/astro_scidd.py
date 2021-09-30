@@ -252,23 +252,34 @@ class SciDDAstroFile(SciDDAstro, SciDDFileResource):
 		CACHE_KEY = f"astro/filename:{filename}"
 
 		try:
-			# fetch from cache
-			list_of_results = json.loads(LocalAPICache.defaultCache()[CACHE_KEY])
-			logger.debug("API cache hit")
+			use_cache = os.environ["SCIDD_USE_CACHE"].lower() not in ["0", "false", "f"]
 		except KeyError:
+			use_cache = True
+
+		list_of_results = None
+		if use_cache:
+			try:
+				# fetch from cache
+				list_of_results = json.loads(LocalAPICache.defaultCache()[CACHE_KEY])
+				logger.debug("API cache hit")
+			except KeyError:
+				pass
+
+		if list_of_results is None:
 			# Use the generic filename resolver which assumes the filename is unique across all curated data.
 			# If this is not the case, override this method in a subclass (e.g. see the twomass.py file).
 			list_of_results = SciDDAstroResolver.defaultResolver().genericFilenameResolver(filename=filename)
 
-			# save to cache
-			try:
-				LocalAPICache.defaultCache()[CACHE_KEY] = json.dumps(list_of_results)
-			except Exception as e:
-				raise e # remove after debugging
-				logger.debug(f"Note: exception in trying to save API response to cache: {e}")
-				pass
+			if use_cache:
+				# save to cache
+				try:
+					LocalAPICache.defaultCache()[CACHE_KEY] = json.dumps(list_of_results)
+				except Exception as e:
+					raise e # remove after debugging
+					logger.debug(f"Note: exception in trying to save API response to cache: {e}")
+					pass
 
-		logger.debug(f"{list_of_results=}")
+		logger.debug(f"list_of_results={list_of_results}")
 
 		if allow_multiple_results:
 			for record in list_of_results:
