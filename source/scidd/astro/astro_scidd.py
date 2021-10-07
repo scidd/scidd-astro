@@ -4,6 +4,7 @@ import os
 import re
 import pdb
 import json
+import logging
 import pathlib
 from typing import Union, List
 
@@ -16,6 +17,8 @@ import astropy.units as u
 from astropy.coordinates import SkyCoord
 
 from . import SciDDAstroResolver
+
+logger = logging.getLogger("scidd.astro")
 
 compression_extensions = [".zip", ".tgz", ".gz", "bz2"]
 
@@ -323,16 +326,25 @@ class SciDDAstroFile(SciDDAstro, SciDDFileResource):
 
 			records = scidd.core.API().get(path="/astro/data/filename-search", params=parameters)
 
-			logger.debug(records)
+			logger.debug(f"filename-search records: {records}")
 			if not len(records) == 1:
 				raise Exception(f"Expected to find a single matching record; {len(records)} found.")
 
 			pos = records[0]["position"] # array of two points
+			# The API will return null if a position could not be determined.
+			# In that case, return a position of [0,0].
+			# This may mask a bigger problem, but the place
+			# to catch that is probably elsewhere.
+			if pos is None:
+				pos = [0,0]
+
 			self._position = SkyCoord(ra=pos[0]*u.deg, dec=pos[1]*u.deg)
 
 			# while we have the info...
 			if self._url is None:
 				self._url = records[0]["url"]
-				self._uncompressed_file_size = records[0]["file_size"]
+				if records[0]["file_size"]:
+					# value is null if not available
+					self._uncompressed_file_size = records[0]["file_size"]
 
 		return self._position
