@@ -319,10 +319,15 @@ class SciDDAstroFile(SciDDAstro, SciDDFileResource):
 				"dataset"  : self.datasetRelease
 			}
 
+			#logger.debug(f"{self=}")
+			#logger.debug(f"{self.dataset=}")
 			# handle cases where filenames are not unique
-			if self == "2mass":
-				raise NotImplementedError("TODO: handle 'uniqueid' or whatever we land on to disambiguate filenames.")
-				parameters[""] = None
+			if self.dataset == "2mass":
+				uid = self.filenameUniqueIdentifier
+				if uid is None:
+					raise Exception(f"This SciDD points to a 2MASS filename but does not include a 'uniqueid' identifier. This is required to disambiguate 2MASS filenames which are not unique in the dataset.")
+				else:
+					parameters["uniqueid"] = uid
 
 			records = scidd.core.API().get(path="/astro/data/filename-search", params=parameters)
 
