@@ -340,6 +340,10 @@ class SciDDAstroFile(SciDDAstro, SciDDFileResource):
 			# In that case, return a position of [0,0].
 			# This may mask a bigger problem, but the place
 			# to catch that is probably elsewhere.
+			#
+			# This is an example of a file that returns NULL for the representative position:
+			# AIS_316_0001_sg65-nd-intbgsub.fits.gz
+			#
 			if pos is None:
 				pos = [0,0]
 

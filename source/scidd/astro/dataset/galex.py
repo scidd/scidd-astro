@@ -8,15 +8,15 @@ from scidd.core.logger import scidd_logger as logger
 
 from .dataset import DatasetResolverBase
 
-logger = logging.getLogger("scidd")
+logger = logging.getLogger("scidd.astro")
 
 @singleton
 class GALEXResolver(DatasetResolverBase):
-	
+
 	@property
 	def dataset(self):
 		return "galex"
-	
+
 	@property
 	def releases(self):
 		return ["gr6", "gr7"]
