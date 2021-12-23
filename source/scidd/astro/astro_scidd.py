@@ -55,13 +55,16 @@ class SciDDAstro(SciDD):
 				if match.group("type") == "data":
 					return super().__new__(scidd.astro.SciDDAstroData)
 				else: # type == "file"
-					return super().__new__(scidd.astro.dataset.twomass.SciDDAstro2MassFile)
+					#return super().__new__(scidd.astro.dataset.twomass.SciDDAstro2MASSFile)
+					return super().__new__(scidd.astro.SciDDAstroFile)
 
 			# anything else that can be handled by the "generic" classes
 			if str(sci_dd).startswith("scidd:/astro/data/"):
 				return super().__new__(scidd.astro.SciDDAstroData)
 			elif str(sci_dd).startswith("scidd:/astro/file/"):
 				return super().__new__(scidd.astro.SciDDAstroFile)
+			else:
+				raise ValueError(f"The SciDD was not interpreted as an astro data or file ID: '{sci_dd}'")
 
 		return super().__new__(cls)
 
