@@ -332,9 +332,11 @@ class SciDDAstroFile(SciDDAstro, SciDDFileResource):
 				else:
 					parameters["uniqueid"] = uid
 
+			logger.debug(f"parameters={parameters}")
+
 			records = scidd.core.API().get(path="/astro/data/filename-search", params=parameters)
 
-			logger.debug(f"filename-search records: {records}")
+			logger.debug(f"filename-search records: {json.dumps(records, indent=4)}")
 			if not len(records) == 1:
 				raise Exception(f"Expected to find a single matching record; {len(records)} found.")
 
